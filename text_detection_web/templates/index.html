@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hello</title>
+</head>
+
+<body>
+    <h1>heleloeloelgeoglo</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>ORIGINAL_NAME</th>
+                <th>FILENAME</th>
+                <th>INFO</th>
+                <th>DE_IDENTIFICATION_IMG</th>
+                <th>EDIT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td>{{item['_id']}}</td>
+                <td>{{item['original_name']}}</td>
+                <td>{{item['filename']}}</td>
+                <td>{{item['id_info']}}</td>
+                <td><img src="{{url_for('static', filename='result/'+item['filename'].split('/')[-1]+'.jpg')}}" alt="이미지 없음" width="100" height="80"></td>
+                <td><a href="/edit/{{item['_id']}}"><button>EDIT</button></a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <hr>
+    <form action="/de_identification" , method="POST">
+        <input type="file" , name="filename">
+        <input type="submit" , value="비식별화">
+    </form>
+    <hr>
+    <form action="/search_result" , method="GET">
+        <input type="search" name="search" id="" placeholder="찾고자하는 이미지 파일이름">
+        <input type="submit" value="검색">
+    </form>
+</body>
+
+</html>

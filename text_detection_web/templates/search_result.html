@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search_Result</title>
+</head>
+
+<body>
+    {% if data == None %}
+    <h1>No result</h1>
+    <form action="/de_identification" , method="POST">
+        <input type="file" , name="filename">
+        <input type="submit" , value="비식별화">
+    </form>
+    {% else %} {% for item in data %}
+    <h1>Result data</h1>
+    <p>ID : <span>{{item['_id']}}</span></p>
+    <p>ORIGINAL_NAME : <span>{{item['original_name']}}</span></p>
+    <p>FILENAME : <span>{{item['filename']}}</span></p>
+    <p>INFO : <span>{{item['id_info']}}</span></p>
+    <img src="{{url_for('static', filename='img/'+item['original_name'].split('/')[-1])}}" alt="이미지 없음"> {% endfor %}{% endif %}
+    <hr>
+    <a href="/"><button>돌아가기</button></a>
+</body>
+
+</html>

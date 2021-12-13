@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDITOR</title>
+</head>
+
+<body>
+    <h1>EDIT PAGE</h1>
+    <p>ID : <span>{{data['_id']}}</span></p>
+    <p>ORIGINAL_NAME : <span>{{data['original_name']}}</span></p>
+    <p>FILENAME : <span>{{data['filename']}}</span></p>
+    <p>INFO : <span>{{data['id_info']}}</span></p>
+    <img src="{{url_for('static', filename='img/'+data['original_name'].split('/')[-1])}}" alt="이미지 없음">
+    <hr>
+    <form action="/edit/{{data['_id']}}" method="post">
+        <textarea name="id_info" id="" cols="30" rows="10">{{data['id_info']}} </textarea>
+        <input type="submit" value="수정하기">
+    </form>
+</body>
+
+</html>
