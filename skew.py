@@ -5,8 +5,9 @@ import cv2
 
 def compute_skew(file_name):
     #load in grayscale:
-    src = cv2.imread(file_name,0) # original_image
-    img = src.copy()
+    src1 = cv2.imread(file_name) # original_image
+    src2 = cv2.imread(file_name,0)  # gray
+    img = src2.copy()
     _,th1 = cv2.threshold(img,0,255,cv2.THRESH_BINARY|cv2.THRESH_OTSU)
     cv2.bitwise_not(th1, th1)
     canny = cv2.Canny(th1, 100, 200)
@@ -35,7 +36,7 @@ def compute_skew(file_name):
         angle_list.append(angle)
 
     theta = angle_list[0]* 180.0 / np.pi
-    return (theta)   
+    return src1, theta   
 
 
 
@@ -45,21 +46,14 @@ def deskew(original_img, theta):
     # 이미지의 중심점을 기준으로 theta도 회전 하면서 1.0배 Scale
     M= cv2.getRotationMatrix2D((w/2, h/2), theta, 1.0) # 변환행렬
     dst = cv2.warpAffine(original_img, M,(w, h))
-
-    # cv2.imshow('Original', original_img)
-    # cv2.imshow('Rotation', dst)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
     return dst
 
 
 
 
 ################################################ test ####################################################
-# file_name = "./img/id7.jpg"
-# img = cv2.imread(file_name)
-
-# theta = compute_skew(file_name)
+# file_name = "./img/driver1.jpg"
+# img, theta = compute_skew(file_name)
 # print(theta)
 # dst = deskew(img,theta)
 
