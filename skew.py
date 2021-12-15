@@ -44,20 +44,24 @@ def compute_skew(file_name):
 def deskew(original_img, theta):
     h,w = original_img.shape[:2]
     # 이미지의 중심점을 기준으로 theta도 회전 하면서 1.0배 Scale
-    M= cv2.getRotationMatrix2D((w/2, h/2), theta, 1.0) # 변환행렬
-    dst = cv2.warpAffine(original_img, M,(w, h))
-    return dst
+    # 가로각도 기준 |theta|==90 이면 skew하지 않는다.
+    if abs(theta) < 45:
+        M= cv2.getRotationMatrix2D((w/2, h/2), theta, 1.0) # 변환행렬
+        dst = cv2.warpAffine(original_img, M,(w, h))
+        return dst
+    else:
+        return original_img
 
 
 
 
 ################################################ test ####################################################
-# file_name = "./img/driver1.jpg"
+# file_name = "./img/id7.jpg"
 # img, theta = compute_skew(file_name)
 # print(theta)
-# dst = deskew(img,theta)
+# img2 = deskew(img,theta)
 
 # cv2.imshow("original", img)
-# cv2.imshow("deskew",dst)
+# cv2.imshow("deskew",img2)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows

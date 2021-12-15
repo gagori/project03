@@ -88,7 +88,7 @@ def rectangle_detect(file_path, lang='kor'):
     cv2.imwrite(temp_filename, img)
 
     ###################### text detection ################################
-    config = r'--oem 3 --psm 6 outputbase digits' # 숫자만 
+    config = r'--oem 2 --psm 6 -c tessedit_char_whitelist=0123456789-.'
     num_boxes = pytesseract.pytesseract.image_to_data(th1, lang='kor+eng', config=config)
     text = clean_text(pytesseract.pytesseract.image_to_string(th1, lang=lang))
 
