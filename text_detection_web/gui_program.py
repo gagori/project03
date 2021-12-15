@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog as fd
 import os
 from PIL import Image, ImageTk
-from text_detection_web.text_face_detection_complete2 import *
+from text_face_detection_complete import *
 import pymongo
 
 window = tk.Tk()
