@@ -7,12 +7,23 @@ import re
 import skew
 import camscanner
 import yolo
+import glob
 
 # path 추가 (윈도우에선 시스템환경변수설정) : 바로가기
 pytesseract.pytesseract.tesseract_cmd ='C:/Program Files/Tesseract-OCR/tesseract.exe'
 cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')  # harr분류기를 통해서 clf... YOLO가 성능은 더 좋음
 IMAGE_SIZE = 1800
 
+percentType = 5
+detectTypeResult = 0
+PersonalInfoType="미확인"
+patternDir=r'./static/Config/pattern'
+
+PatternIDCARD=glob.glob(patternDir+"/IDCARD/*.jpg")    #주민등록증
+PatternDRIVER=glob.glob(patternDir+"/DRIVER/*.jpg")    #운전면허증
+PatternFAMILLY=glob.glob(patternDir+"/FAMILLY/*.jpg")  #가족관계증명서
+PatternPASSPORT=glob.glob(patternDir+"/PASSPORT/*.jpg")#여권
+PatternRESIDENT=glob.glob(patternDir+"/RESIDENT/*.jpg")#주민등록표
 
 def convert_gray_color(file_path):
     img = cv2.imread(file_path)
@@ -150,10 +161,116 @@ def id_info(file_path, lang='kor'):
     text = clean_text(pytesseract.pytesseract.image_to_string(gray_image, lang=lang))
     return text
 
+def diffImg(img1, img2):
+    orb = cv2.ORB_create()
+    kp1, des1 = orb.detectAndCompute(img1, None)
+    kp2, des2 = orb.detectAndCompute(img2, None)
+
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    matches = bf.match(des1, des2)
+    matches = sorted(matches, key=lambda x: x.distance)
+
+    # Draw first 10 matches.
+    # outImg = np.empty((1,1))
+    # img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches[:10], outImg, flags=2)
+
+    # plt.imshow(img3),plt.show()
 
 
+    bf = cv2.BFMatcher()
+    matches = bf.knnMatch(des1, des2, k=2)
+    good = []
+
+    for m, n in matches:
+        if m.distance < 0.71 * n.distance:
+            good.append([m])
+
+    # print('PersonalType Good Detected Count: %d'%(len(good)))
+    if len(good) > percentType:
+        knn_image = cv2.drawMatchesKnn(img1, kp1, img2, kp2, good, None, flags=2)
+
+        #plt.imshow(knn_image)
+        #plt.show()
+
+    return len(good)
 
 
+def detectedType(OrgMat,PatternMat):
+    #iPattermImg = cImg.readImg(pattern)
+    #img2 = cImg.readImg(orgMat)
+    if diffImg(OrgMat, PatternMat) > percentType:
+        result = 1
+    else:
+        result = 0
 
+    return result
 
+def getType(file_path) :
+    detectTypeResult = 0
+    PersonalInfoType="미확인"
 
+    inputImg = cv2.imread(file_path)
+
+    # 주민등록증
+    if detectTypeResult == 0:
+        # print('\n###DEBUG_LoadPatternData:[ Pattern_IDCARD ]')
+        for i in range(0,len(PatternIDCARD)):
+            _iPattermImg = cv2.imread(PatternIDCARD[i])
+            # print('LoadPatternIMG: [%s]' %(PatternIDCARD[i]))
+            if detectedType(inputImg,_iPattermImg) != 0:
+                detectTypeResult = 1
+                PersonalInfoType = '주민등록증'
+
+                #print('PersonalType Detected: %s' % (PersonalInfoType))
+                break
+    # 운전면허증
+    if detectTypeResult == 0:
+        # print('\n###DEBUG_LoadPatternData:[ Pattern_DRIVER ]')
+        for i in range(0, len(PatternDRIVER)):
+            _iPattermImg = cv2.imread(PatternDRIVER[i])
+            # print('LoadPatternIMG: [%s]' %(PatternDRIVER[i]))
+            if detectedType(inputImg, _iPattermImg) != 0:
+                detectTypeResult = 2
+                PersonalInfoType = '운전면허증'
+                #print('PersonalType Detected: %s' % (PersonalInfoType)) 
+                break
+    # 가족관계증명서
+    if detectTypeResult == 0:
+        # print('\n###DEBUG_LoadPatternData:[ Pattern_FAMILLY ]')
+        for i in range(0, len(PatternFAMILLY)):
+            _iPattermImg = cv2.imread(PatternFAMILLY[i])
+            # print('LoadPatternIMG: [%s]' %(PatternFAMILLY[i]))
+            if detectedType(inputImg, _iPattermImg) != 0:
+                detectTypeResult = 3
+                PersonalInfoType = '가족관계증명서'
+                # print('PersonalType Detected: %s' % (PersonalInfoType))
+                break
+    # 여권
+    if detectTypeResult == 0:
+        # print('\n###DEBUG_LoadPatternData:[ Pattern_PASSPORT ]')
+        for i in range(0, len(PatternPASSPORT)):
+            _iPattermImg = cv2.imread(PatternPASSPORT[i])
+            # print('LoadPatternIMG: [%s]' %(PatternPASSPORT[i]))
+            if detectedType(inputImg, _iPattermImg) != 0:
+                detectTypeResult = 4
+                PersonalInfoType = '여권'
+                # print('PersonalType Detected: %s' % (PersonalInfoType))
+                break
+    # 주민등록등본/초본
+    if detectTypeResult == 0:
+        # print('\n###DEBUG_LoadPatternData:[ Pattern_RESIDENT ]')
+        for i in range(0, len(PatternRESIDENT)):
+            _iPattermImg = cv2.imread(PatternRESIDENT[i])
+            print('LoadPatternIMG: [%s]' %(PatternRESIDENT[i]))
+            if detectedType(inputImg, _iPattermImg) != 0:
+                detectTypeResult = 5
+                PersonalInfoType = '주민등록등본초본'
+                # print('PersonalType Detected: %s' % (PersonalInfoType))
+                break
+
+    # 못찾음
+    if detectTypeResult == 0:
+        detectTypeResult = 6
+        PersonalInfoType = '구분불가'
+
+    return PersonalInfoType
