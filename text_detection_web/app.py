@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.debug = True # 웹에 오류메시지 뜨게함.
 
 #몽고디비에 저장하기 위한 함수만들기
-def insert_data(text, name, original_name):
+def insert_data(text, name, original_name, info_type_name):
     print(myclient)
     mydb = myclient['iddb']
     id_info = mydb['info']
@@ -18,6 +18,7 @@ def insert_data(text, name, original_name):
         'original_name':original_name,
         'filename': name,
         'id_info': text,
+        'info_type_name' : info_type_name,
         'create_at': (datetime.now()).strftime("%Y-%m-%dT%H:%M:%S")
     }
     data = id_info.insert_one(info_dict)
@@ -65,10 +66,11 @@ def upload():
     if request.method =='POST':
         filename=request.form['filename']
         print(filename)
+        infoTypeName = getType(f'static/img/{filename}')
         file_name = rectangle_detect(f'static/img/{filename}')
         print(file_name)
         text = id_info(f'static/img/{filename}')
-        insert_data(text, file_name, filename)
+        insert_data(text, file_name, filename, infoTypeName)
         return redirect('/')
         
 if __name__ =='__main__':
