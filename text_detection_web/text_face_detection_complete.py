@@ -4,10 +4,9 @@ import numpy as np
 from PIL import Image
 import pytesseract
 import re
-import matplotlib.pyplot as plt
 import skew
-from imutils.object_detection import non_max_suppression
-from numpy.lib.arraysetops import isin
+import camscanner
+import yolo
 
 # path 추가 (윈도우에선 시스템환경변수설정) : 바로가기
 pytesseract.pytesseract.tesseract_cmd ='C:/Program Files/Tesseract-OCR/tesseract.exe'
@@ -22,7 +21,7 @@ def convert_gray_color(file_path):
 
 def convert_rgb_color(file_path):
     img = cv2.imread(file_path)
-    rgb_img = cv2.cvtColor(file_path, cv2.COLOR_BGR2RGB)
+    rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return rgb_img
 
 # text 정제처리 : 특수문자 삭제
@@ -72,23 +71,28 @@ def rectangle_detect(file_path, lang='kor'):
     ###################### skew correction ###############################
     src, theta = skew.compute_skew(file_path)
     img = skew.deskew(src, theta)  # Skew Correction 진행된 최종 사진 : img
+    img = camscanner.scanner(img)
+
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray_img, (1, 1), 0)  # denoising
     _, th1 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # gray scale을 받음. binarization
 
     ###################### face detection ###############################
     # gray_img = convert_gray_color(file_path)
-    faces = cascade.detectMultiScale(gray_img, scaleFactor=1.1, minNeighbors=5, minSize=(5,5)) # 숫자 바꿔보기!! 낮추니까 얼굴을 더 잘잡았음.
-    for b in faces:
-        x,y,w,h = b
-        cv2.rectangle(img, (x,y),(x+w,y+h), (0,255,0), -1)
-        cv2.putText(img,"FACE",(x,y+10), cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5, color=(0,0,255), thickness=1 )
-    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') # 임시파일 만들어줌
-    temp_filename = temp_file.name
-    cv2.imwrite(temp_filename, img)
+    # faces = cascade.detectMultiScale(gray_img, scaleFactor=1.1, minNeighbors=5, minSize=(5,5)) # 숫자 바꿔보기!! 낮추니까 얼굴을 더 잘잡았음.
+    # for b in faces:
+    #     x,y,w,h = b
+    #     cv2.rectangle(img, (x,y),(x+w,y+h), (0,255,0), -1)
+    #     cv2.putText(img,"FACE",(x,y+10), cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5, color=(0,0,255), thickness=1 )
+    # temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') # 임시파일 만들어줌
+    # temp_filename = temp_file.name
+    # cv2.imwrite(temp_filename, img)
+    ###################### face detection wit yolo ########################
+    img = yolo.yolo_face(img,0.6,0.3,False)
 
     ###################### text detection ################################
-    config = r'--oem 2 --psm 6 -c tessedit_char_whitelist=0123456789-.'
+    config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-.'
+    # config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-.'
     num_boxes = pytesseract.pytesseract.image_to_data(th1, lang='kor+eng', config=config)
     text = clean_text(pytesseract.pytesseract.image_to_string(th1, lang=lang))
 
@@ -114,11 +118,11 @@ def rectangle_detect(file_path, lang='kor'):
                     file_name += name[i]
 
     if file_name:
-        cv2.imwrite(f'result/{file_name}.jpg' , img)
-        with open(f'result/{file_name}.txt', 'w', encoding="UTF-8") as f :
+        cv2.imwrite(f'static/result/{file_name}.jpg' , img)
+        with open(f'static/result/{file_name}.txt', 'w', encoding="UTF-8") as f :
             f.write(text)
             f.close()
-        return f'result/{file_name}'
+        return f'static/result/{file_name}'
         
     else:
         import string
@@ -128,11 +132,11 @@ def rectangle_detect(file_path, lang='kor'):
         for x in range(number_of_strings):
             temp_filename = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length_of_string))
         print(temp_filename)
-        cv2.imwrite(f'result/{temp_filename}.jpg' , img)
-        with open(f'result/{temp_filename}.txt', 'w', encoding="UTF-8") as f :
+        cv2.imwrite(f'static/result/{temp_filename}.jpg' , img)
+        with open(f'static/result/{temp_filename}.txt', 'w', encoding="UTF-8") as f :
             f.write(text)
             f.close()
-        return f'result/{temp_filename}'
+        return f'static/result/{temp_filename}'
 
 
 
