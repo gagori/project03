@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def yolo_face(img, conf_th, nms_th, use_copied_array=True):
+def yolo(img, conf_th, nms_th, use_copied_array=True):
     # coco classes
     classes = []
     with open("model/coco.names", "r") as f:
@@ -18,8 +18,11 @@ def yolo_face(img, conf_th, nms_th, use_copied_array=True):
     
     #전체 Darknet layer에서 13x13 grid, 26x26, 52x52 grid에서 detect된 Output layer만 filtering
     layer_names = net.getLayerNames()
-    output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
-    
+    # print("ln:",layer_names)
+    # print("\n",net.getUnconnectedOutLayers())
+    output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
+    # print("ol:",output_layers)
+
     # 로딩한 모델은 Yolov3 416 x 416 모델임. 원본 이미지 배열을 사이즈 (416, 416)으로, BGR을 RGB로 변환하여 배열 입력
     # Object Detection 수행하여 결과를 outs으로 반환 
     blob=cv2.dnn.blobFromImage(img, scalefactor=1/255.0, size=(416, 416), swapRB=True, crop=False)
@@ -61,7 +64,7 @@ def yolo_face(img, conf_th, nms_th, use_copied_array=True):
 
 ## test ##
 # img = cv2.imread("static/img/driver4.jpg")
-# draw_img =yolo_face(img,0.6,0.3,False)
+# draw_img =yolo_face(img,0.6,0.3,True)
 # cv2.imshow("original image :",img)
 # cv2.imshow("face detection by yolo :",draw_img)
 # cv2.waitKey(0)
