@@ -10,6 +10,7 @@ import glob
 import os
 import craft_show
 import yolov5
+import yolo
 
 global UPLOAD_FOLDER
 global RESULT_FOLDER
@@ -98,59 +99,19 @@ def rectangle_detect(origin_file_name, lang='kor'):
     src, theta = skew.compute_skew(os.path.join(UPLOAD_FOLDER, origin_file_name))
     img = skew.deskew(src, theta)  # Skew Correction 진행된 최종 사진 : img
     # img = camscanner.scanner(img)
-
+    ###################### preprocessing #################################
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray_img, (1, 1), 0)  # denoising
     _, th1 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # gray scale을 받음. binarization
 
-    ###################### face detection ###############################
-    # gray_img = convert_gray_color(file_path)
-    # faces = cascade.detectMultiScale(gray_img, scaleFactor=1.1, minNeighbors=5, minSize=(5,5)) # 숫자 바꿔보기!! 낮추니까 얼굴을 더 잘잡았음.
-    # for b in faces:
-    #     x,y,w,h = b
-    #     cv2.rectangle(img, (x,y),(x+w,y+h), (0,255,0), -1)
-    #     cv2.putText(img,"FACE",(x,y+10), cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5, color=(0,0,255), thickness=1 )
-    # temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') # 임시파일 만들어줌
-    # temp_filename = temp_file.name
-    # cv2.imwrite(temp_filename, img)
-    ###################### face detection wit yolo ########################
-    img1 = yolov5.yolov5(img)
-    ###################### text detection ################################
+    ###################### face detection with yolo ########################
+    # img1 = yolov5.yolov5(img)
+    img = yolo.yolo(img,0.6,0.5,True)
+    ###################### text detection + recognition #################################
     _,dst = craft_show.craft_tesseract(img, th1)
-
-    # config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-.'
-    # # config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-.'
-    # num_boxes = pytesseract.pytesseract.image_to_data(th1, lang='kor+eng', config=config)
-    # text = clean_text(pytesseract.pytesseract.image_to_string(th1, lang=lang))
-
-    # img = craft_show.craft_tesseract(th1)
-
-    # num_list=[]
-    # file_name=""
-    # for idx, b in enumerate(num_boxes.splitlines()):
-    #     if idx !=0:
-    #         b = b.split()
-    #         if len(b) ==12 :
-    #             if ('-' in b[11]) and (len(b[11])>8):
-    #                 num_list.append(b)
-
-    # for i in range(len(num_list)):
-    #     id_num = num_list[i][11]
-    #     if len(id_num) >= 8 and ('.' not in id_num):
-    #         x,y,w,h = int(num_list[i][6]),int(num_list[i][7]),int(num_list[i][8]),int(num_list[i][9])
-    #         cv2.rectangle(img, (x,y),(x+w,y+h), (0,255,0), -1)
-    #         cv2.putText(img, "ID NUMBER", (x,y+10), cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5, color=(0,0,255), thickness=1)
-
-    #         name = clean_text(num_list[i][11])
-    #         for i in range(len(name)):
-    #             if i % 2 ==0 :
-    #                 file_name += name[i]
 
     file_name = random_name()
     cv2.imwrite(os.path.join(RESULT_FOLDER, file_name + '.jpg') , img)
-    # with open(os.path.join(RESULT_FOLDER, file_name + '.txt'), 'w', encoding="UTF-8") as f :
-    #     f.write(text)
-    #     f.close()
     return file_name
 
 

@@ -56,8 +56,8 @@ def yolo(img, conf_th, nms_th, use_copied_array=True):
             x, y, w, h = boxes[i]
             label = str(classes[class_ids[i]])
             caption = f"{label}:{confidences[i]}"
-            cv2.rectangle(draw_img, (x, y), (x + w, y + h), (0,255,0), -1)
-            cv2.putText(draw_img, "FACE", (x, y + 30), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 2)
+            cv2.rectangle(draw_img, (x, y), (x + w, y + h), (0,0,0), -1)
+            # cv2.putText(draw_img, "FACE", (x, y + 30), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 2)
             
     return draw_img
 

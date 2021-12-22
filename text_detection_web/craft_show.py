@@ -1,7 +1,6 @@
 import cv2
 import craft
 import pytesseract
-import skew
 import re
 
 pytesseract.pytesseract.tesseract_cmd ='C:/Program Files/Tesseract-OCR/tesseract.exe'
@@ -27,16 +26,16 @@ def craft_tesseract(dst, th1):
         
         ######################### Number de-identification ########################################
         # config = r'--oem 3 --psm 6 outputbase digits'
-        # config = r'--oem 2 --psm 6 -c tessedit_char_whitelist=0123456789-.'
-        number_info = pytesseract.image_to_string(imgCrop, lang='kor')#,config=config)
+        config = r'--oem 2 --psm 6 -c tessedit_char_whitelist=0123456789-.'
+        number_info = pytesseract.image_to_string(imgCrop, lang='kor',config=config)
         numData.append(number_info)
-        if ('-' in number_info) and ('.' not in number_info) and len(number_info) > 12 :
-            # cv2.putText(dst, "ID",(r[0],r[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0,0,255),1)
+        if ('-' in number_info) and ('.' not in number_info) and len(number_info) > 8:
             cv2.rectangle(dst, (left,top), (right,bottom), (0,0,0), -1)
+            # cv2.putText(dst, number_info, (r[0],r[1]+10), cv2.FONT_HERSHEY_PLAIN, 1, (0,0,255),1)
 
-        ######################### Kor de-identification ########################################
-        # kor_info = clean_text(pytesseract.image_to_string(imgCrop, lang='kor'))
-        # kor_info = pytesseract.image_to_string(imgCrop, lang='kor')
+        ######################### Kor de-identification ###########################################
+        kor_info = clean_text(pytesseract.image_to_string(imgCrop, lang='kor'))
+        kor_info = pytesseract.image_to_string(imgCrop, lang='kor')
         # korData.append(kor_info)
         # if " " in kor_info:
         #     cv2.rectangle(dst, (left,top), (right,bottom), (255,0,0), -1)
