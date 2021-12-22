@@ -158,15 +158,15 @@
                 </div>
             </div>
             <div class="sidebar-footer">
-                <!-- <a href="##" class="sidebar-user">
+                <a href="##" class="sidebar-user">
                     <span class="sidebar-user-img">
-                <picture><source srcset="/static/img/avatar/avatar-illustrated-01.webp" type="image/webp"><img src="/static/img/avatar/avatar-illustrated-01.png" alt="User name"></picture>
-            </span>
+                        <picture><img src="/static/img/Asset.png" alt="AI"></picture>
+                    </span>
                     <div class="sidebar-user-info">
-                        <span class="sidebar-user__title">Nafisa Sh.</span>
-                        <span class="sidebar-user__subtitle">Support manager</span>
+                        <span class="sidebar-user__title">Privacy Protect</span>
+                        <span class="sidebar-user__subtitle">De-identification</span>
                     </div>
-                </a> -->
+                </a>
             </div>
         </aside>
         <div class="main-wrapper">
@@ -280,7 +280,7 @@
                                             </th>
                                             <th>ID</th>
                                             <th>ORIGINAL_NAME</th>
-                                            <th>FILENAME</th>
+                                            <th>RESULT_NAME</th>
                                             <th>INFO</th>
                                             <th>EDIT</th>
                                         </tr>
@@ -292,7 +292,7 @@
 
                                                 <label class="users-table__checkbox">
                                                     <div class="categories-table-img">
-                                                    <picture><source srcset="{{url_for('static', filename='result/'+item['filename'].split('/')[-1]+'.jpg')}}" type="image/webp"><img src="{{url_for('static', filename='result/'+item['filename'].split('/')[-1]+'.jpg')}}" alt="NO IMAGE"></picture>
+                                                    <picture><source srcset="{{url_for('static', filename='img/result/'+item['result_name'].split('/')[-1]+'.jpg')}}" type="image/webp"><img src="{{url_for('static', filename='img/result/'+item['result_name'].split('/')[-1]+'.jpg')}}" alt="NO IMAGE"></picture>
                                                     </div>
                                                 </label>
                                             </td>
@@ -306,7 +306,7 @@
                                                 {{item['original_name']}}
                                                 <!-- </div> -->
                                             </td>
-                                            <td>{{item['filename']}}</td>
+                                            <td>{{item['result_name']}}</td>
                                             <td>
                                                 {% if item['id_info']|length > 30 %} {{ item['id_info']|truncate(length=30, end='...') }} {% else %} {{ item['id_info']}} {% endif %}
                                             </td>
@@ -338,7 +338,7 @@
                                 </div>
                                 <ul class="top-cat-list">
                                     <li>
-                                        <form action="/de_identification" method="POST" id="de_identification">
+                                        <form enctype="multipart/form-data" action="/de_identification" method="POST" id="de_identification">
                                             <a href="##">
                                                 <div class="top-cat-list__title">
                                                     <input type="file" name="filename" id="filename">

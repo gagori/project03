@@ -158,15 +158,15 @@
                 </div>
             </div>
             <div class="sidebar-footer">
-                <!-- <a href="##" class="sidebar-user">
+                <a href="##" class="sidebar-user">
                     <span class="sidebar-user-img">
-                        <picture><source srcset="/static/img/avatar/avatar-illustrated-01.webp" type="image/webp"><img src="/static/img/avatar/avatar-illustrated-01.png" alt="User name"></picture>
+                        <picture><img src="/static/img/Asset.png" alt="AI"></picture>
                     </span>
                     <div class="sidebar-user-info">
-                        <span class="sidebar-user__title">Nafisa Sh.</span>
-                        <span class="sidebar-user__subtitle">Support manager</span>
+                        <span class="sidebar-user__title">Privacy Protect</span>
+                        <span class="sidebar-user__subtitle">De-identification</span>
                     </div>
-                </a> -->
+                </a>
             </div>
         </aside>
         <div class="main-wrapper">
@@ -263,60 +263,58 @@
             <!-- ! Main -->
             <main class="main" id="skip-target">
                 <div class="container">
-                    <div class="main-title-wrapper">
+                    <div class="main-title-wrapper" style="margin-bottom:2px;">
                         <h2 class="main-title">EDITOR</h2>
                     </div>
                     <div class="row new-page__row">
-                        <div class="col-xl-5 col-md-6">
+                        <div class="col-xl-4 col-md-6">
                             <div class="main-content new-page-content">
-                                <label>
-                            <!-- <span class="new-page-label">ID</span> -->
-                            <ul class="top-cat-list">
-                                <li>
-                                    <a href="##">
-                                        <div class="top-cat-list__title" style="font-size: medium;">
-                                            <!-- Lifestyle <span>8.2k</span> -->
-                                            ID
-                                        </div>
-                                        <div class="top-cat-list__subtitle" style="font-size: small;">
-                                            {{data['_id']}}
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="##">
-                                        <div class="top-cat-list__title" style="font-size: medium;">
-                                            <!-- Lifestyle <span>8.2k</span> -->
-                                            ORIGINAL_NAME
-                                        </div>
-                                        <div class="top-cat-list__subtitle" style="font-size: small;">
-                                            {{data['original_name']}}
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="##">
-                                        <div class="top-cat-list__title" style="font-size: medium;">
-                                            <!-- Lifestyle <span>8.2k</span> -->
-                                            FILENAME
-                                        </div>
-                                        <div class="top-cat-list__subtitle" style="font-size: small;">
-                                            {{data['filename']}}
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="##">
-                                        <div class="top-cat-list__title" style="font-size: medium;">
-                                            <!-- Lifestyle <span>8.2k</span> -->
-                                            INFO
-                                        </div>
-                                        
-                                        <div class="top-cat-list__subtitle" style="font-size: small;"><pre>{{data['id_info']}}</pre></div>
-                                    </a>
-                                </li>
-                                
-                            </ul>
+                                <ul class="top-cat-list">
+                                    <li>
+                                        <a href="##">
+                                            <div class="top-cat-list__title" style="font-size: medium;">
+                                                <!-- Lifestyle <span>8.2k</span> -->
+                                                ID
+                                            </div>
+                                            <div class="top-cat-list__subtitle" style="font-size: small;">
+                                                {{data['_id']}}
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="##">
+                                            <div class="top-cat-list__title" style="font-size: medium;">
+                                                <!-- Lifestyle <span>8.2k</span> -->
+                                                ORIGINAL_NAME
+                                            </div>
+                                            <div class="top-cat-list__subtitle" style="font-size: small;">
+                                                {{data['original_name']}}
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="##">
+                                            <div class="top-cat-list__title" style="font-size: medium;">
+                                                <!-- Lifestyle <span>8.2k</span> -->
+                                                RESULT_NAME
+                                            </div>
+                                            <div class="top-cat-list__subtitle" style="font-size: small;">
+                                                {{data['result_name']}}
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="##">
+                                            <div class="top-cat-list__title" style="font-size: medium;">
+                                                <!-- Lifestyle <span>8.2k</span> -->
+                                                INFO
+                                            </div>
+
+                                            <div class="top-cat-list__subtitle" style="font-size: small; white-space: pre;">{{data['id_info']}}</div>
+                                        </a>
+                                    </li>
+
+                                </ul>
                             </div>
                         </div>
 
@@ -325,10 +323,9 @@
                                 <ul class="top-cat-list">
                                     <li>
                                         <a href="##">
-
-                                            <picture>
-                                                <source srcset="{{url_for('static', filename='img/'+data['original_name'].split('/')[-1])}}"><img src="{{url_for('static', filename='img/'+data['original_name'].split('/')[-1])}}" alt="이미지 없음">
-                                            </picture>
+                                            <div class="top-cat-list__title" style="font-size: medium;">
+                                                유형 : {{data['info_type_name']}}
+                                            </div>
                                         </a>
                                     </li>
                                     <li>
@@ -338,9 +335,37 @@
                                                     <!-- Lifestyle <span>8.2k</span> -->
                                                     EDIT INFO
                                                 </div>
-                                                <textarea required class="resize-none" type="text" name="id_info" placeholder="{{data['id_info']}}" rows="10" style="width:100%">{{data['id_info']}}</textarea>
+                                                <textarea required class="resize-none" type="text" name="id_info" placeholder="{{data['id_info']}}" rows="25" style="width:100%">{{data['id_info']}}</textarea>
                                             </a>
                                         </form>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6">
+                            <div class="main-content new-page-content">
+                                <ul class="top-cat-list">
+                                    <li>
+                                        <a href="##">
+                                            <div class="top-cat-list__title" style="font-size: medium;">
+                                                BEFORE
+                                            </div>
+                                            <picture>
+                                                <source srcset="{{url_for('static', filename='img/origin/'+data['original_name'].split('/')[-1])}}"><img src="{{url_for('static', filename='img/origin/'+data['original_name'].split('/')[-1])}}" alt="이미지 없음">
+                                            </picture>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="##">
+                                            <div class="top-cat-list__title" style="font-size: medium;">
+                                                AFTER
+                                            </div>
+                                            <picture>
+                                                <source srcset="{{url_for('static', filename='img/result/'+data['result_name'].split('/')[-1]+'.jpg')}}"><img src="{{url_for('static', filename='img/result/'+data['result_name'].split('/')[-1]+'.jpg')}}" alt="이미지 없음">
+                                            </picture>
+                                        </a>
                                     </li>
                                 </ul>
                             </div>
@@ -357,7 +382,6 @@
                             </a>
                         </div>
                     </div>
-                </div>
             </main>
             <!-- ! Footer -->
             <footer class="footer">
@@ -367,29 +391,29 @@
                     </div>
                     <ul class="footer-end">
                         <!-- <li><a href="##">About</a></li>
-                        <li><a href="##">Support</a></li>
-                        <li><a href="##">Puchase</a></li> -->
+                            <li><a href="##">Support</a></li>
+                            <li><a href="##">Puchase</a></li> -->
                     </ul>
                 </div>
             </footer>
+            </div>
         </div>
-    </div>
-    <!-- Chart library -->
-    <script src="/static/plugins/chart.min.js"></script>
-    <!-- Icons library -->
-    <script src="/static/plugins/feather.min.js"></script>
-    <!-- Custom scripts -->
-    <script src="/static/js/script.js"></script>
-    <script>
-        function submitForm() {
-            let form = document.getElementById("form__submit");
-            form.submit();
-        }
+        <!-- Chart library -->
+        <script src="/static/plugins/chart.min.js"></script>
+        <!-- Icons library -->
+        <script src="/static/plugins/feather.min.js"></script>
+        <!-- Custom scripts -->
+        <script src="/static/js/script.js"></script>
+        <script>
+            function submitForm() {
+                let form = document.getElementById("form__submit");
+                form.submit();
+            }
 
-        function goHome() {
-            location.href="/"
-        }
-    </script>
+            function goHome() {
+                location.href = "/"
+            }
+        </script>
 </body>
 
 </html>

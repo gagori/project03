@@ -9,14 +9,17 @@ myclient = pymongo.MongoClient('mongodb+srv://yjlee:admin1@de-identification.9zs
 app = Flask(__name__)
 app.debug = True # 웹에 오류메시지 뜨게함.
 
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER + '/'
+app.config['RESULT_FOLDER'] = RESULT_FOLDER + '/'
+
 #몽고디비에 저장하기 위한 함수만들기
-def insert_data(text, name, original_name, info_type_name):
+def insert_data(text, result_name, original_name, info_type_name):
     print(myclient)
     mydb = myclient['iddb']
     id_info = mydb['info']
     info_dict = {
         'original_name':original_name,
-        'filename': name,
+        'result_name': result_name,
         'id_info': text,
         'info_type_name' : info_type_name,
         'create_at': (datetime.now()).strftime("%Y-%m-%dT%H:%M:%S")
@@ -64,13 +67,16 @@ def edit(id):
 @app.route('/de_identification', methods=['GET','POST'])
 def upload():
     if request.method =='POST':
-        filename=request.form['filename']
-        print(filename)
-        infoTypeName = getType(f'static/img/{filename}')
-        file_name = rectangle_detect(f'static/img/{filename}')
-        print(file_name)
-        text = id_info(f'static/img/{filename}')
-        insert_data(text, file_name, filename, infoTypeName)
+        origin_file_name = ''
+        # filename=request.form['filename']
+        if 'filename' in request.files:
+            file = request.files['filename']
+            origin_file_name = random_name()
+            file.save(app.config['UPLOAD_FOLDER'] + origin_file_name + '.jpg')
+        infoTypeName = getType(origin_file_name)
+        result_file_name = rectangle_detect(origin_file_name)
+        text = id_info(origin_file_name)
+        insert_data(text, result_file_name, origin_file_name, infoTypeName)
         return redirect('/')
         
 if __name__ =='__main__':
