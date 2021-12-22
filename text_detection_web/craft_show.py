@@ -2,37 +2,71 @@ import cv2
 import craft
 import pytesseract
 import camscanner
+import skew
+import re
 pytesseract.pytesseract.tesseract_cmd ='C:/Program Files/Tesseract-OCR/tesseract.exe'
 
-file_path = "static/img/im1.jpg"
-src = cv2.imread(file_path)
-dst = camscanner.scanner(src) # deskew 된 이미지
-roi = craft.get_roi(dst)
-print(len(roi))
+# text 정제처리 : 특수문자 삭제
+def clean_text(read_data):
+    text = re.sub('[0123456789]', '', read_data)
+    return text
 
-myData=[]
-for x,r in enumerate(roi):
-    left, top = r[0]-10,r[1]-5
-    right, bottom = r[2]+5,r[3]+5
-    # cv2.rectangle(dst, (left,top),(right,bottom), (0,0,0), 1)
-    imgCrop = dst[top:bottom , left:right] #h,w
-    # cv2.imshow(str(x), imgCrop)
+
+def craft_tesseract(file_path):
+    src = cv2.imread(file_path)
+
+    ############################## Image correction ##############################################
+    #1. de-skew 
+    _, theta = skew.compute_skew(file_path)
+    dst = skew.deskew(src, theta) # 
+    #2. contour
+    # dst = camscanner.scanner(src) #두방법 중 하나 선택
+
+    ############################## Preprocessing #################################################
+    gray_img = cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray_img, (1,1),0) #denoising
+    _,th1=cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU) #binarization
+    # cv2.imshow("th1",th1)
+
+    ############################## Text Detection #################################################
+    roi = craft.get_roi(th1)  # OCR 쪽에선 th1 을 받고 Face쪽에선 dst 를 받음
+    numData=[]
+    korData=[]
+    for x,r in enumerate(roi):
+        left, top = r[0]-10,r[1]-5
+        right, bottom = r[2]+5,r[3]+5
+        imgCrop = th1[top:bottom , left:right] #h,w
+        # cv2.imshow(str(x), imgCrop)
+        
+        ######################## Text Recognition #################################################
+        # gray_img = cv2.cvtColor(imgCrop, cv2.COLOR_BGR2GRAY)
+        # blur = cv2.GaussianBlur(gray_img, (3, 3), 0)  # denoising
+        # _, th1 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # 
+        
+        ######################### Number de-identification ########################################
+        # config = r'--oem 3 --psm 6 outputbase digits'
+        config = r'--oem 2 --psm 6 -c tessedit_char_whitelist=0123456789-.'
+        number_info = pytesseract.image_to_string(imgCrop, lang='kor',config=config)
+        numData.append(number_info)
+        if ('-' in number_info) and ('.' not in number_info) and len(number_info) > 12 :
+            # cv2.putText(dst, str(myData[x]),(r[0],r[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0,0,255),1)
+            cv2.rectangle(dst, (left,top), (right,bottom), (0,0,0), -1)
+
+        ######################### Kor de-identification ########################################
+        # kor_info = clean_text(pytesseract.image_to_string(imgCrop, lang='kor'))
+        # # kor_info = pytesseract.image_to_string(imgCrop, lang='kor')
+        # korData.append(kor_info)
+        # if " " in kor_info:
+        #     cv2.rectangle(dst, (left,top), (right,bottom), (255,0,0), -1)
     
-    # text recognition
-    gray_img = cv2.cvtColor(imgCrop, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray_img, (3, 3), 0)  # denoising
-    _, th1 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # gray scale을 받음. binarization
-    # cv2.imshow(str(x), th1)
-    
-    config = r'--oem 3 --psm 6 outputbase digits'
-    # config = r'--oem 2 --psm 6 -c tessedit_char_whitelist=0123456789-.'
-    info = pytesseract.image_to_string(th1, lang='kor',config=config)
-    myData.append(info)
-    cv2.putText(dst, str(myData[x]),(r[0],r[1]), cv2.FONT_HERSHEY_PLAIN, 1, (0,0,255),1)
+    # print(numData)
+    # print(len(numData))
+    # print(korData)
+    # print(len(korData))
+    return dst
 
-
-print(myData)
-print(len(myData))
+# ## test ##
+file_path = "static/img/driver4.jpg"
+dst = craft_tesseract(file_path)
 cv2.imshow("imgShow", dst)
 cv2.waitKey(0)
-cv2.destroyAllWindows()

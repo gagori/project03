@@ -24,7 +24,7 @@ def get_roi(image):
         craft_net=craft_net,
         refine_net=refine_net,
         text_threshold=0.9,
-        link_threshold=0.4, # 클수록 잘게 자름
+        link_threshold=0.5, # 클수록 잘게 자름
         low_text=0.6,  # 작을수록 bboxes 오차범위 키움
         long_size=1280
         )
