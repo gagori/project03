@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from text_face_detection_complete import *
 from datetime import datetime
 
-myclient = pymongo.MongoClient('mongodb+srv://yjlee:admin1@de-identification.9zsqz.mongodb.net/iddb?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true')
+myclient = pymongo.MongoClient('mongodb+srv://root:1234@cluster0.eoohb.mongodb.net/iddb?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true')
 app = Flask(__name__)
 app.debug = True # 웹에 오류메시지 뜨게함.
 
@@ -71,8 +71,8 @@ def upload():
         # filename=request.form['filename']
         if 'filename' in request.files:
             file = request.files['filename']
-            origin_file_name = random_name()
-            file.save(app.config['UPLOAD_FOLDER'] + origin_file_name + '.jpg')
+            origin_file_name = random_name() +".jpg"
+            file.save(app.config['UPLOAD_FOLDER'] + origin_file_name)
         infoTypeName = getType(origin_file_name)
         result_file_name = rectangle_detect(origin_file_name)
         text = id_info(origin_file_name)

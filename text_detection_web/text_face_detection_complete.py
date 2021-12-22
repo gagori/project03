@@ -6,9 +6,10 @@ import pytesseract
 import re
 import skew
 import camscanner
-import yolo
 import glob
 import os
+import craft_show
+import yolov5
 
 global UPLOAD_FOLDER
 global RESULT_FOLDER
@@ -93,9 +94,10 @@ def remove_noise_and_smooth(file_name):
 
 def rectangle_detect(origin_file_name, lang='kor'):
     ###################### skew correction ###############################
+    print(os.path.join(UPLOAD_FOLDER, origin_file_name))
     src, theta = skew.compute_skew(os.path.join(UPLOAD_FOLDER, origin_file_name))
     img = skew.deskew(src, theta)  # Skew Correction 진행된 최종 사진 : img
-    img = camscanner.scanner(img)
+    # img = camscanner.scanner(img)
 
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray_img, (1, 1), 0)  # denoising
@@ -112,41 +114,43 @@ def rectangle_detect(origin_file_name, lang='kor'):
     # temp_filename = temp_file.name
     # cv2.imwrite(temp_filename, img)
     ###################### face detection wit yolo ########################
-    img = yolo.yolo_face(img,0.6,0.3,False)
-
+    img1 = yolov5.yolov5(img)
     ###################### text detection ################################
-    config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-.'
+    _,dst = craft_show.craft_tesseract(img, th1)
+
     # config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-.'
-    num_boxes = pytesseract.pytesseract.image_to_data(th1, lang='kor+eng', config=config)
-    text = clean_text(pytesseract.pytesseract.image_to_string(th1, lang=lang))
+    # # config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-.'
+    # num_boxes = pytesseract.pytesseract.image_to_data(th1, lang='kor+eng', config=config)
+    # text = clean_text(pytesseract.pytesseract.image_to_string(th1, lang=lang))
 
-    num_list=[]
-    file_name=""
-    for idx, b in enumerate(num_boxes.splitlines()):
-        if idx !=0:
-            b = b.split()
-            if len(b) ==12 :
-                if ('-' in b[11]) and (len(b[11])>8):
-                    num_list.append(b)
+    # img = craft_show.craft_tesseract(th1)
 
-    for i in range(len(num_list)):
-        id_num = num_list[i][11]
-        if len(id_num) >= 8 and ('.' not in id_num):
-            x,y,w,h = int(num_list[i][6]),int(num_list[i][7]),int(num_list[i][8]),int(num_list[i][9])
-            cv2.rectangle(img, (x,y),(x+w,y+h), (0,255,0), -1)
-            cv2.putText(img, "ID NUMBER", (x,y+10), cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5, color=(0,0,255), thickness=1)
+    # num_list=[]
+    # file_name=""
+    # for idx, b in enumerate(num_boxes.splitlines()):
+    #     if idx !=0:
+    #         b = b.split()
+    #         if len(b) ==12 :
+    #             if ('-' in b[11]) and (len(b[11])>8):
+    #                 num_list.append(b)
 
-            name = clean_text(num_list[i][11])
-            for i in range(len(name)):
-                if i % 2 ==0 :
-                    file_name += name[i]
+    # for i in range(len(num_list)):
+    #     id_num = num_list[i][11]
+    #     if len(id_num) >= 8 and ('.' not in id_num):
+    #         x,y,w,h = int(num_list[i][6]),int(num_list[i][7]),int(num_list[i][8]),int(num_list[i][9])
+    #         cv2.rectangle(img, (x,y),(x+w,y+h), (0,255,0), -1)
+    #         cv2.putText(img, "ID NUMBER", (x,y+10), cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5, color=(0,0,255), thickness=1)
+
+    #         name = clean_text(num_list[i][11])
+    #         for i in range(len(name)):
+    #             if i % 2 ==0 :
+    #                 file_name += name[i]
 
     file_name = random_name()
-
     cv2.imwrite(os.path.join(RESULT_FOLDER, file_name + '.jpg') , img)
-    with open(os.path.join(RESULT_FOLDER, file_name + '.txt'), 'w', encoding="UTF-8") as f :
-        f.write(text)
-        f.close()
+    # with open(os.path.join(RESULT_FOLDER, file_name + '.txt'), 'w', encoding="UTF-8") as f :
+    #     f.write(text)
+    #     f.close()
     return file_name
 
 
@@ -158,6 +162,7 @@ def id_info(origin_file_name, lang='kor'):
     cv2.imwrite(temp_filename,gray_img)
     gray_image = process_image_for_ocr(temp_filename)
     text = clean_text(pytesseract.pytesseract.image_to_string(gray_image, lang=lang))
+    # text,_ = craft_show.craft_tesseract(gray_image,gray_image)
     return text
 
 def diffImg(img1, img2):

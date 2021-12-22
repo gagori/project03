@@ -7,12 +7,6 @@ from craft_text_detector import (
 )
 
 def get_roi(image):
-    # set image path and export folder directory
-    # image = 'static/img/driver3.jpg' # can be filepath, PIL image or numpy array
-    # output_dir = 'craft_outputs/'
-
-    # read image
-    # image = read_image(file_path)
 
     # load models
     refine_net = load_refinenet_model(cuda=False)
@@ -39,7 +33,4 @@ def get_roi(image):
         # print(roi)
 
     return roi
-##test##
-# img, roi = get_roi("static/img/im1.jpg")
-# cv2.imshow("img",img)
-# cv2.waitKey(0)
+
