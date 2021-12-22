@@ -8,6 +8,11 @@ import skew
 import camscanner
 import yolo
 import glob
+import os
+
+global UPLOAD_FOLDER
+global RESULT_FOLDER
+
 
 # path 추가 (윈도우에선 시스템환경변수설정) : 바로가기
 pytesseract.pytesseract.tesseract_cmd ='C:/Program Files/Tesseract-OCR/tesseract.exe'
@@ -17,7 +22,11 @@ IMAGE_SIZE = 1800
 percentType = 5
 detectTypeResult = 0
 PersonalInfoType="미확인"
-patternDir=r'./static/Config/pattern'
+
+paths = os.getcwd()
+UPLOAD_FOLDER = os.path.join(paths, 'static/img/origin')
+RESULT_FOLDER = os.path.join(paths, 'static/img/result')
+patternDir= os.path.join(paths, 'static/Config/pattern')
 
 PatternIDCARD=glob.glob(patternDir+"/IDCARD/*.jpg")    #주민등록증
 PatternDRIVER=glob.glob(patternDir+"/DRIVER/*.jpg")    #운전면허증
@@ -25,8 +34,12 @@ PatternFAMILLY=glob.glob(patternDir+"/FAMILLY/*.jpg")  #가족관계증명서
 PatternPASSPORT=glob.glob(patternDir+"/PASSPORT/*.jpg")#여권
 PatternRESIDENT=glob.glob(patternDir+"/RESIDENT/*.jpg")#주민등록표
 
-def convert_gray_color(file_path):
-    img = cv2.imread(file_path)
+def readImg(file_name) :
+    img = cv2.imread(os.path.join(UPLOAD_FOLDER, file_name))
+    return img
+
+def convert_gray_color(origin_file_name):
+    img = readImg(origin_file_name)
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return gray_img
 
@@ -78,9 +91,9 @@ def remove_noise_and_smooth(file_name):
     return(or_image)
 
 
-def rectangle_detect(file_path, lang='kor'):
+def rectangle_detect(origin_file_name, lang='kor'):
     ###################### skew correction ###############################
-    src, theta = skew.compute_skew(file_path)
+    src, theta = skew.compute_skew(os.path.join(UPLOAD_FOLDER, origin_file_name))
     img = skew.deskew(src, theta)  # Skew Correction 진행된 최종 사진 : img
     img = camscanner.scanner(img)
 
@@ -128,31 +141,17 @@ def rectangle_detect(file_path, lang='kor'):
                 if i % 2 ==0 :
                     file_name += name[i]
 
-    if file_name:
-        cv2.imwrite(f'static/result/{file_name}.jpg' , img)
-        with open(f'static/result/{file_name}.txt', 'w', encoding="UTF-8") as f :
-            f.write(text)
-            f.close()
-        return f'static/result/{file_name}'
-        
-    else:
-        import string
-        import random
-        number_of_strings = 5
-        length_of_string = 8
-        for x in range(number_of_strings):
-            temp_filename = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length_of_string))
-        print(temp_filename)
-        cv2.imwrite(f'static/result/{temp_filename}.jpg' , img)
-        with open(f'static/result/{temp_filename}.txt', 'w', encoding="UTF-8") as f :
-            f.write(text)
-            f.close()
-        return f'static/result/{temp_filename}'
+    file_name = random_name()
+
+    cv2.imwrite(os.path.join(RESULT_FOLDER, file_name + '.jpg') , img)
+    with open(os.path.join(RESULT_FOLDER, file_name + '.txt'), 'w', encoding="UTF-8") as f :
+        f.write(text)
+        f.close()
+    return file_name
 
 
-
-def id_info(file_path, lang='kor'):
-    gray_img = convert_gray_color(file_path)
+def id_info(origin_file_name, lang='kor'):
+    gray_img = convert_gray_color(origin_file_name)
     
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
     temp_filename = temp_file.name
@@ -205,17 +204,17 @@ def detectedType(OrgMat,PatternMat):
 
     return result
 
-def getType(file_path) :
+def getType(origin_file_name) :
     detectTypeResult = 0
     PersonalInfoType="미확인"
 
-    inputImg = cv2.imread(file_path)
+    inputImg = readImg(origin_file_name)
 
     # 주민등록증
     if detectTypeResult == 0:
         # print('\n###DEBUG_LoadPatternData:[ Pattern_IDCARD ]')
         for i in range(0,len(PatternIDCARD)):
-            _iPattermImg = cv2.imread(PatternIDCARD[i])
+            _iPattermImg = readImg(PatternIDCARD[i])
             # print('LoadPatternIMG: [%s]' %(PatternIDCARD[i]))
             if detectedType(inputImg,_iPattermImg) != 0:
                 detectTypeResult = 1
@@ -227,7 +226,7 @@ def getType(file_path) :
     if detectTypeResult == 0:
         # print('\n###DEBUG_LoadPatternData:[ Pattern_DRIVER ]')
         for i in range(0, len(PatternDRIVER)):
-            _iPattermImg = cv2.imread(PatternDRIVER[i])
+            _iPattermImg = readImg(PatternDRIVER[i])
             # print('LoadPatternIMG: [%s]' %(PatternDRIVER[i]))
             if detectedType(inputImg, _iPattermImg) != 0:
                 detectTypeResult = 2
@@ -238,7 +237,7 @@ def getType(file_path) :
     if detectTypeResult == 0:
         # print('\n###DEBUG_LoadPatternData:[ Pattern_FAMILLY ]')
         for i in range(0, len(PatternFAMILLY)):
-            _iPattermImg = cv2.imread(PatternFAMILLY[i])
+            _iPattermImg = readImg(PatternFAMILLY[i])
             # print('LoadPatternIMG: [%s]' %(PatternFAMILLY[i]))
             if detectedType(inputImg, _iPattermImg) != 0:
                 detectTypeResult = 3
@@ -249,7 +248,7 @@ def getType(file_path) :
     if detectTypeResult == 0:
         # print('\n###DEBUG_LoadPatternData:[ Pattern_PASSPORT ]')
         for i in range(0, len(PatternPASSPORT)):
-            _iPattermImg = cv2.imread(PatternPASSPORT[i])
+            _iPattermImg = readImg(PatternPASSPORT[i])
             # print('LoadPatternIMG: [%s]' %(PatternPASSPORT[i]))
             if detectedType(inputImg, _iPattermImg) != 0:
                 detectTypeResult = 4
@@ -260,7 +259,7 @@ def getType(file_path) :
     if detectTypeResult == 0:
         # print('\n###DEBUG_LoadPatternData:[ Pattern_RESIDENT ]')
         for i in range(0, len(PatternRESIDENT)):
-            _iPattermImg = cv2.imread(PatternRESIDENT[i])
+            _iPattermImg = readImg(PatternRESIDENT[i])
             print('LoadPatternIMG: [%s]' %(PatternRESIDENT[i]))
             if detectedType(inputImg, _iPattermImg) != 0:
                 detectTypeResult = 5
@@ -274,3 +273,9 @@ def getType(file_path) :
         PersonalInfoType = '구분불가'
 
     return PersonalInfoType
+
+def random_name(n=6) :
+    import string
+    import random
+    ran_str = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(n))
+    return ran_str
