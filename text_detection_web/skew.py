@@ -27,7 +27,7 @@ def compute_skew(file_name):
             cv2.line(img, pt1, pt2, (0,0,255), 2, cv2.LINE_AA)
             cv2.circle(img,pt1,3,(255,0,0),-1)
             cv2.putText(img,f"{i+1}",pt1,cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5, color=(255,0,0), thickness=1)
-
+    # cv2.imshow("img",img)
     #calculate the angle between each line and the horizontal line:
     angle = 0.0
     angle_list = []
@@ -50,13 +50,14 @@ def deskew(original_img, theta):
         dst = cv2.warpAffine(original_img, M,(w, h))
         return dst
     else:
-        return original_img
+        img = original_img.copy()
+        return img
 
 
 
 
 ################################################ test ####################################################
-# file_name = "./img/id7.jpg"
+# file_name = "static/img/im3.jpg"
 # img, theta = compute_skew(file_name)
 # print(theta)
 # img2 = deskew(img,theta)
